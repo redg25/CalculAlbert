@@ -31,8 +31,15 @@ class Calcul:
         self.result = self.c_para['max_result'] + 1
         while not isinstance(self.result, int) or self.result > self.c_para['max_result']:
             self.numbers = get_numbers(self.c_para['max_nb'],self.c_para['ranges'])
+            if "/" in self.c_para['operands']:
+                self.numbers.sort(reverse = True)
+            print(self.numbers)
             self.operands = get_operands(len(self.numbers),self.c_para['operands'])
             self.result = get_result(self.numbers,self.operands)
+            if "/" in self.c_para['operands'] and self.result.is_integer():
+                self.result = int(self.result)
+
+
         return self.result
 
 
@@ -48,9 +55,9 @@ print (c2.numbers,c2.operands,c2.result)
 c3 = Calcul({'max_result':100,'max_nb':3,'operands':['+','*'],'ranges':[10]})
 c3.make_calcul()
 print (c3.numbers,c3.operands,c3.result)
-# c4= Calcul({'max_result':100,'max_nb':3,'operands':['/'],'ranges':[100]})
-# c4.make_calcul()
-# print (c4.numbers,c4.operands,c4.result)
+c4= Calcul({'max_result':100,'max_nb':3,'operands':['/'],'ranges':[100,50,50]})
+c4.make_calcul()
+print (c4.numbers,c4.operands,c4.result)
 
 
 

@@ -16,7 +16,7 @@ def get_numbers(nb:int,ranges:List[int]) -> List[int]:
         ranges.append(ranges[-1])
     numbers = []
     for r in ranges:
-        numbers.append(random.choice(range(r+1)))
+        numbers.append(random.choice(range(1,r+1)))
     return numbers
 
 
