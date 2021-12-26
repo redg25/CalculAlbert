@@ -20,10 +20,21 @@ def get_numbers(nb:int,ranges:List[int]) -> List[int]:
     return numbers
 
 
-def get_operands(nb_len:int,operands_order:List[str])->List[str]:
-    pass
+def get_operands(nb_len:int,operands:List[str])->List[str]:
+    operands_ordered = []
+    for i in range(nb_len-1):
+        operands_ordered.append(random.choice(operands))
+    return operands_ordered
 
 def get_result(numbers:List[int],operands:List[str])-> int:
-    pass
+    dund = {'+':'__add__','*':'__mul__','/':'__truediv__','-':'__sub__'}
+    result = numbers[0]
+    for n,op in zip(numbers[1:],operands):
+        if op == "/" and n == 0:
+            n = 1
+        calc = getattr(result,dund[op])
+        result = calc(n)
+    return result
+
 
 
