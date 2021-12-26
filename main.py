@@ -27,6 +27,18 @@ class Calcul:
         else:
             return reduce(lambda a,b: a/b,self.numbers)
 
+    def make_calcul(self,c_para:dict)-> tuple:
+        self.result = max + 1
+        while result <= max:
+            self.numbers = get_numbers()
+            self.operands = get_operands()
+            result = get_result(self.numbers,self.operands)
+
+
+
+
+
+
 
 
 
