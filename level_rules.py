@@ -10,13 +10,15 @@ def level1():
     else:
         return level1()
 
-def get_numbers(nb:int,ranges:List[int]) -> List[int]:
+def get_numbers(nb:int,ranges:List[int],is_division:bool) -> List[int]:
     missing_ranges = nb-len(ranges)
     for i in range(missing_ranges):
         ranges.append(ranges[-1])
     numbers = []
     for r in ranges:
         numbers.append(random.choice(range(1,r+1)))
+    if is_division:
+        numbers.sort(reverse=True)
     return numbers
 
 
@@ -26,14 +28,15 @@ def get_operands(nb_len:int,operands:List[str])->List[str]:
         operands_ordered.append(random.choice(operands))
     return operands_ordered
 
-def get_result(numbers:List[int],operands:List[str])-> int:
+def get_result(numbers:List[int],operands:List[str],is_division:bool)-> int:
     dund = {'+':'__add__','*':'__mul__','/':'__truediv__','-':'__sub__'}
     result = numbers[0]
     for n,op in zip(numbers[1:],operands):
-        if op == "/" and n == 0:
-            n = 1
         calc = getattr(result,dund[op])
         result = calc(n)
+    #Cast the result to int from float if there was a division in the calcul and the result is an integer
+    if is_division and result.is_integer():
+        result = int(result)
     return result
 
 

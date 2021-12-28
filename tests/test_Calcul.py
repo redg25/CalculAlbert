@@ -31,19 +31,21 @@ para_set_5 = {'max_result':10,'max_nb':3,'operands':['+','*'],'ranges':[10]}
 
 def test_get_numbers():
     for i in range(10):
-        nb = get_numbers(para_set_1['max_nb'],para_set_1['ranges'])
+        nb = get_numbers(para_set_1['max_nb'],para_set_1['ranges'],False)
         assert len(nb) == 2
         for n in nb:
             assert n < 11
-        nb = get_numbers(para_set_2['max_nb'], para_set_2['ranges'])
+        nb = get_numbers(para_set_2['max_nb'], para_set_2['ranges'],False)
         assert len(nb) == 2
         assert nb[0]<11
         assert nb[1]<6
-        nb = get_numbers(para_set_3['max_nb'], para_set_3['ranges'])
+        nb = get_numbers(para_set_3['max_nb'], para_set_3['ranges'],False)
         assert len(nb) == 3
         assert nb[0] < 11
         assert nb[1] < 6
         assert nb[2] < 6
+        nb = get_numbers(para_set_3['max_nb'], para_set_3['ranges'], True)
+        assert nb[0]>=nb[1]>=nb[2]
 
 def test_get_operands():
     nb_add = 0
@@ -57,7 +59,7 @@ def test_get_operands():
     assert nb_add > 2 and nb_multiply > 2
 
 def test_get_result():
-    assert get_result(set_int_1, op1) == 5
-    assert get_result(set_int_2, op2) == 24
-    assert get_result(set_int_2, op3) == 20
-    assert get_result(set_int_3, op4) == 5
+    assert get_result(set_int_1, op1,False) == 5
+    assert get_result(set_int_2, op2,False) == 24
+    assert get_result(set_int_2, op3,False) == 20
+    assert get_result(set_int_3, op4,True) == 5
