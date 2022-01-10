@@ -61,5 +61,5 @@ def test_get_operands():
 def test_get_result():
     assert get_result(set_int_1, op1,False) == 5
     assert get_result(set_int_2, op2,False) == 24
-    assert get_result(set_int_2, op3,False) == 20
+    assert get_result(set_int_2, op3,False) == 14
     assert get_result(set_int_3, op4,True) == 5
