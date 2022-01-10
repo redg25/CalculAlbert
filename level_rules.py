@@ -1,15 +1,6 @@
 import random
 from typing import List
 
-
-def level1():
-    n1 = random.choice(range(10))
-    n2 = random.choice(range(10))
-    if n1 + n2 < 11:
-        return [n1, n2], "+"
-    else:
-        return level1()
-
 def get_numbers(nb:int,ranges:List[int],is_division:bool) -> List[int]:
     missing_ranges = nb-len(ranges)
     for i in range(missing_ranges):
