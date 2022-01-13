@@ -1,53 +1,41 @@
-from main import Calcul
-from level_rules import *
+from main import *
 
-set_int_1 = [2,3]
-set_int_2 = [2,3,4]
-set_int_3 = [20,2,2]
-
-op1 = ["+"]
-op2 = ['*','*']
-op3 = ["+","*"]
-op4 = ['/','/']
-
-para_set_1 = {'max_result':10,'max_nb':2,'operands':['+'],'ranges':[10]}
-para_set_2 = {'max_result':10,'max_nb':2,'operands':['+'],'ranges':[10,5]}
-para_set_3 = {'max_result':10,'max_nb':3,'operands':['+'],'ranges':[10,5]}
-para_set_4 = {'max_result':10,'max_nb':2,'operands':['+','*'],'ranges':[10]}
-para_set_5 = {'max_result':10,'max_nb':3,'operands':['+','*'],'ranges':[10]}
-
+c1 = Calcul(10,2,['+'],[10])
+c2 = Calcul(100,3,['+','*','/'],[50,10])
+c3 = Calcul(100,5,['+','*','/'],[50,10])
 
 def test_get_numbers():
     for i in range(10):
-        nb = get_numbers(para_set_1['max_nb'],para_set_1['ranges'],False)
-        assert len(nb) == 2
-        for n in nb:
+        c1.make_operation()
+        c2.make_operation()
+        nb1 = c1.numbers_for_operations
+        nb2 = c2.numbers_for_operations
+        assert len(nb1) == 2
+        assert len(nb2) == 3
+        for n in nb1:
             assert n < 11
-        nb = get_numbers(para_set_2['max_nb'], para_set_2['ranges'],False)
-        assert len(nb) == 2
-        assert nb[0]<11
-        assert nb[1]<6
-        nb = get_numbers(para_set_3['max_nb'], para_set_3['ranges'],False)
-        assert len(nb) == 3
-        assert nb[0] < 11
-        assert nb[1] < 6
-        assert nb[2] < 6
-        nb = get_numbers(para_set_3['max_nb'], para_set_3['ranges'], True)
-        assert nb[0]>=nb[1]>=nb[2]
+        nb2.sort(reverse=True)
+        assert nb2[0]<51
+        assert nb2[1]<11
+        assert nb2[2]<11
 
-def test_get_operands():
-    nb_add = 0
-    nb_multiply = 0
+
+def test_get_operators():
     for i in range(10):
-        op = get_operands(para_set_5['max_nb'],para_set_5['operands'])
-        assert len(op) == 2
-        assert op[0] in ['+','*'] and op[1] in ['+','*']
-        if (op[0] or op[1]) == '+': nb_add += 1
-        if (op[0] or op[1]) == '*': nb_multiply += 1
-    assert nb_add > 2 and nb_multiply > 2
+        c1.make_operation()
+        c2.make_operation()
+        c3.make_operation()
+        assert len(c1.operators_for_operations) == 1
+        assert len(c2.operators_for_operations) == 2
+        assert "+" == c1.operators_for_operations[0]
+        for op in c3.operators_for_operations:
+            assert op in c3.operators
 
 def test_get_result():
-    assert get_result(set_int_1, op1,False) == 5
-    assert get_result(set_int_2, op2,False) == 24
-    assert get_result(set_int_2, op3,False) == 14
-    assert get_result(set_int_3, op4,True) == 5
+    for i in range(10):
+        c1.make_operation()
+        c2.make_operation()
+        c3.make_operation()
+        assert eval(c1.operation_string) == c1.result
+        assert eval(c2.operation_string) == c2.result
+        assert eval(c3.operation_string) == c3.result
