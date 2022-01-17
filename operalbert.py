@@ -1,9 +1,10 @@
 """This module create a class to generate random operations based on various parameters"""
 import random
 from typing import List, Optional,Union
-from typing_extensions import Literal
+#from typing_extensions import Literal
 
-Ops = List[Literal['+','-','*','/']]
+# Ops = List[Literal['+','-','*','/']]
+Ops = List[str]
 FloatInt = Optional[Union[float, int]]
 
 

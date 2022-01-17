@@ -1,4 +1,4 @@
-from main import *
+from operalbert import *
 
 c1 = Calcul(10,2,['+'],[10])
 c2 = Calcul(100,3,['+','*','/'],[50,10])
