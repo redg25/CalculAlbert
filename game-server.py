@@ -13,6 +13,7 @@ class Player:
     name: str = None
     playing: bool = False
     score:int = 0
+    turn: int = 1
 
 server = None
 HOST_ADDR = "127.0.0.1"
@@ -24,6 +25,7 @@ clients_names = []
 player_data = []
 operations = []
 game_started = False
+game_turn = 1
 
 
 def create_request(action, value):
@@ -75,7 +77,7 @@ def are_players_ready() -> bool:
             all_players_have_names = False
             break
 
-    return not game_started and len(players) == 2 and all_players_have_names
+    return (game_turn == 1) and len(players) == 2 and all_players_have_names
 
 def add_name_to_player(sock, name):
     for player in players:
@@ -84,17 +86,37 @@ def add_name_to_player(sock, name):
             break
 
 def send_receive_client_message(client_connection,addr):
-    global game_started
+    global game_started, game_turn,players
     global operations
     while True:
         try:
+            current_player = get_player_from_client(client_connection)
             if are_players_ready():
+                game_turn += 1
                 print(players)
                 game_started = True
                 for player in players:
                     send_new_request(player.client,'wait','3')
                 sleep(3)
-                start_a_game()
+                value = start_a_game()
+                for player in players:
+                    send_new_request(player.client,'operation',value)
+            # TODO
+            # elif game_turn == 4:
+            #     all_players_done = True
+            #     for player in players:
+            #         if player.turn != 4:
+            #             all_players_done = False
+            #     if not all_players_done:
+            #         value = dict(score=current_player.score,message="Please wait for your opponent to finish")
+            #         send_new_request(client_connection,'end_game',value)
+            #     else:
+            #
+            #         value = dict(score=current_player.score,message="Please wait for your opponent to finish")
+            #         send_new_request(client_connection,'end_game',value)
+
+
+
             else:
                 message = Message(client_connection,(HOST_ADDR, HOST_PORT))
                 message.process_events('r')
@@ -116,11 +138,37 @@ def send_receive_client_message(client_connection,addr):
                     value = {'op_str':new_op_str,'res':res}
                     for player in players:
                         send_new_request(player.client,'operation',value)
+                elif action == 'answer':
+                    player = get_player_from_client(client_connection)
+                    player.score = value['score']
+                    player.turn +=1
+                    print (operations,player.turn)
+                    if len(operations)<player.turn:
+                        print('first player to play')
+                        value = start_a_game()
+                        print(value)
+                        send_new_request(player.client,'operation',value)
+                    else:
+                        print('second player to play')
+                        operation = operations[player.turn -1]
+                        value = {'op_str':operation[0],'res':operation[1]}
+                        print(value)
+                        send_new_request(player.client,'operation',value)
+                    print(f'{player.name} score is {player.score}')
+
+
+
+
+
         except Exception as e:
             print(e)
             break
     client_connection.close()
 
+def get_player_from_client(client)-> Player:
+    for player in players:
+        if player.client == client:
+            return player
 
 # Return the index of the current client in the list of clients
 def start_a_game():
@@ -128,8 +176,8 @@ def start_a_game():
     new_op_str,res = c.make_operation()
     operations.append((new_op_str,res))
     value = {'op_str':new_op_str,'res':res}
-    for player in players:
-        send_new_request(player.client,'operation',value)
+    return value
+
 
 def get_client_index(client_list, curr_client):
     idx = 0

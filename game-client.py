@@ -4,7 +4,7 @@ from process_request_client import Message
 # network client
 HOST_ADDR = "127.0.0.1"
 HOST_PORT = 8080
-
+my_score = 0
 
 def create_request(action, value):
     return dict(
@@ -30,6 +30,7 @@ def send_new_request(client,action,value):
 
 
 def receive_message_from_server(client, m):
+    global my_score
     while True:
         try:
             message = Message(client,(HOST_ADDR,HOST_PORT))
@@ -40,13 +41,18 @@ def receive_message_from_server(client, m):
                 if value['nb_of_players']=='1':
                     print(f'Welcome {value}')
                     print('Waiting for another player...\n'
-                                   'Press "q" to quit\n')
+                          'Press "q" to quit\n')
                 elif value['nb_of_players']=='2':
                     print(f'Welcome {value}')
             elif action == 'wait':
                 print(f'Game will start in {value} seconds...')
             elif action == 'operation':
-                input(value['op_str'])
+                score = 0
+                my_answer = input(value['op_str'])
+                if str(my_answer) == str(value['res']):
+                    my_score+=1
+                request = dict(score=my_score)
+                send_new_request(client,'answer',request)
         except Exception as e:
             print(e)
             break
