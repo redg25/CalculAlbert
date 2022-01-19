@@ -6,10 +6,10 @@ import struct
 
 
 class Message:
-    def __init__(self, sock, addr, request):
+    def __init__(self, sock, addr):
         self.sock = sock
         self.addr = addr
-        self.request = request
+        self.request = None
         self._recv_buffer = b""
         self._send_buffer = b""
         self._request_queued = False
@@ -86,6 +86,7 @@ class Message:
             self.write()
 
     def read(self):
+
         self._read()
 
         if self._jsonheader_len is None:
@@ -98,6 +99,8 @@ class Message:
         if self.jsonheader:
             if self.response is None:
                 self.process_response()
+
+
 
     def write(self):
         if not self._request_queued:
@@ -182,7 +185,7 @@ class Message:
             encoding = self.jsonheader["content-encoding"]
             self.response = self._json_decode(data, encoding)
             print("received response", repr(self.response), "from", self.addr)
-            self._process_response_json_content()
+            #self._process_response_json_content()
         else:
             # Binary or unknown content-type
             self.response = data

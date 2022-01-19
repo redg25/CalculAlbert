@@ -71,7 +71,6 @@ class Message:
         return message
 
     def _create_response_json_content(self):
-        print(f"score is {scores['turn']}")
         action = self.request.get("action")
         if action == "new_player":
             name = self.request.get("value")
