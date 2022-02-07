@@ -5,6 +5,8 @@ from typing import List
 from process_request_client import Message
 from OperationScript.operalbert import Calcul
 from time import sleep
+from datetime import datetime
+
 
 @dataclass
 class Player:
@@ -14,6 +16,7 @@ class Player:
     playing: bool = False
     score:int = 0
     turn: int = 1
+    time_to_finish = None
 
 server = None
 HOST_ADDR = "127.0.0.1"
@@ -26,6 +29,8 @@ player_data = []
 operations = []
 game_started = False
 game_turn = 1
+max_turn = 4
+game_start_time = None
 
 
 def create_request(action, value):
@@ -86,7 +91,7 @@ def add_name_to_player(sock, name):
             break
 
 def send_receive_client_message(client_connection,addr):
-    global game_started, game_turn,players
+    global game_started, game_turn,players, game_start_time
     global operations
     while True:
         try:
@@ -101,22 +106,7 @@ def send_receive_client_message(client_connection,addr):
                 value = start_a_game()
                 for player in players:
                     send_new_request(player.client,'operation',value)
-            # TODO
-            # elif game_turn == 4:
-            #     all_players_done = True
-            #     for player in players:
-            #         if player.turn != 4:
-            #             all_players_done = False
-            #     if not all_players_done:
-            #         value = dict(score=current_player.score,message="Please wait for your opponent to finish")
-            #         send_new_request(client_connection,'end_game',value)
-            #     else:
-            #
-            #         value = dict(score=current_player.score,message="Please wait for your opponent to finish")
-            #         send_new_request(client_connection,'end_game',value)
-
-
-
+                game_start_time = datetime.now()
             else:
                 message = Message(client_connection,(HOST_ADDR, HOST_PORT))
                 message.process_events('r')
@@ -143,7 +133,21 @@ def send_receive_client_message(client_connection,addr):
                     player.score = value['score']
                     player.turn +=1
                     print (operations,player.turn)
-                    if len(operations)<player.turn:
+                    if player.turn == max_turn:
+                        end_time = datetime.now()
+                        time_passed = end_time - game_start_time
+                        player.time_to_finish = get_a_str_of_time_in_mn_sec(time_passed)
+                    if player.turn == max_turn and not have_players_finished(players):
+                        value = dict(score=current_player.score,message="Please wait for your opponent to finish")
+                        send_new_request(client_connection,'end_game',value)
+                    elif have_players_finished(players):
+                        ls_of_results = {}
+                        for player in players:
+                            ls_of_results[player.name]=[player.score,player.time_to_finish]
+                        for player in players:
+                            value = dict(scores=ls_of_results)
+                            send_new_request(player.client,'final',value)
+                    elif len(operations)<player.turn:
                         print('first player to play')
                         value = start_a_game()
                         print(value)
@@ -155,10 +159,6 @@ def send_receive_client_message(client_connection,addr):
                         print(value)
                         send_new_request(player.client,'operation',value)
                     print(f'{player.name} score is {player.score}')
-
-
-
-
 
         except Exception as e:
             print(e)
@@ -188,6 +188,17 @@ def get_client_index(client_list, curr_client):
 
     return idx
 
+def have_players_finished(players)-> bool:
+    for player in players:
+        if player.turn < max_turn:
+            return False
+    return True
+
+def get_a_str_of_time_in_mn_sec(time_passed):
+    all_sec = time_passed.total_seconds()
+    min = int(all_sec//60)
+    only_sec = round(all_sec % 60,2)
+    return f'{min} min {only_sec} seconds'
 
 server = start_server()
 

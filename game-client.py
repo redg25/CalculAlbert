@@ -47,12 +47,17 @@ def receive_message_from_server(client, m):
             elif action == 'wait':
                 print(f'Game will start in {value} seconds...')
             elif action == 'operation':
-                score = 0
                 my_answer = input(value['op_str'])
                 if str(my_answer) == str(value['res']):
                     my_score+=1
                 request = dict(score=my_score)
                 send_new_request(client,'answer',request)
+            elif action == 'end_game':
+                print(value['message'])
+            elif action == 'final':
+                for score in value['scores']:
+                    print(f'{score} has {value["scores"][score][0]} in {value["scores"][score][1]}')
+
         except Exception as e:
             print(e)
             break
