@@ -1,10 +1,21 @@
 import socket
 from process_request_client import Message
+import client_screen_action
 
 # network client
 HOST_ADDR = "127.0.0.1"
 HOST_PORT = 8080
-my_score = 0
+
+# Mapping of methods to call based on requests received from server
+screen_actions:dict = {'welcome':'client_receive_welcome',
+                       'wait':'client_receive_wait',
+                       'operation':'client_receive_operation',
+                       'end_game':'client_receive_end_game',
+                       'final':'client_receive_final'}
+
+# Mapping of request names to send back to server based on requests received from server
+send_back_request:dict = {'operation':'answer'}
+
 
 def create_request(action, value):
     return dict(
@@ -30,34 +41,19 @@ def send_new_request(client,action,value):
 
 
 def receive_message_from_server(client, m):
-    global my_score
     while True:
         try:
             message = Message(client,(HOST_ADDR,HOST_PORT))
             message.process_events('r')
             action = message.response['action']
             value = message.response['value']
-            if action == 'welcome':
-                if value['nb_of_players']=='1':
-                    print(f'Welcome {value}')
-                    print('Waiting for another player...\n'
-                          'Press "q" to quit\n')
-                elif value['nb_of_players']=='2':
-                    print(f'Welcome {value}')
-            elif action == 'wait':
-                print(f'Game will start in {value} seconds...')
-            elif action == 'operation':
-                my_answer = input(value['op_str'])
-                if str(my_answer) == str(value['res']):
-                    my_score+=1
-                request = dict(score=my_score)
-                send_new_request(client,'answer',request)
-            elif action == 'end_game':
-                print(value['message'])
-            elif action == 'final':
-                for score in value['scores']:
-                    print(f'{score} has {value["scores"][score][0]} in {value["scores"][score][1]}')
-
+            #Get method to call based on request from server
+            action_method_to_call = getattr(client_screen_action,screen_actions[action])
+            request_to_send = action_method_to_call(value)
+            #Send a request back if necessary
+            if request_to_send:
+                action_to_server = send_back_request[action]
+                send_new_request(client,action_to_server,request_to_send)
         except Exception as e:
             print(e)
             break

@@ -24,12 +24,12 @@ HOST_PORT = 8080
 client_name = " "
 clients = []
 players: List[Player] = []
-clients_names = []
-player_data = []
-operations = []
-game_started = False
-game_turn = 1
-max_turn = 4
+# clients_names = []
+# player_data = []
+operations: List[tuple] = []
+game_started: bool = False
+game_turn: int = 1
+max_turn: int = 4
 game_start_time = None
 
 
@@ -77,7 +77,6 @@ def accept_clients(the_server, y):
 def are_players_ready() -> bool:
     all_players_have_names = True
     for player in players:
-        print(player.name)
         if player.name == None:
             all_players_have_names = False
             break
@@ -97,8 +96,7 @@ def send_receive_client_message(client_connection,addr):
         try:
             current_player = get_player_from_client(client_connection)
             if are_players_ready():
-                game_turn += 1
-                print(players)
+                print(f'Players are ready to play...')
                 game_started = True
                 for player in players:
                     send_new_request(player.client,'wait','3')
@@ -106,7 +104,9 @@ def send_receive_client_message(client_connection,addr):
                 value = start_a_game()
                 for player in players:
                     send_new_request(player.client,'operation',value)
+                    print (f'New operation sent to {player.name}')
                 game_start_time = datetime.now()
+                game_turn += 1
             else:
                 message = Message(client_connection,(HOST_ADDR, HOST_PORT))
                 message.process_events('r')
@@ -129,8 +129,9 @@ def send_receive_client_message(client_connection,addr):
                     for player in players:
                         send_new_request(player.client,'operation',value)
                 elif action == 'answer':
+                    print('Server here')
                     player = get_player_from_client(client_connection)
-                    player.score = value['score']
+                    player.score += value['score']
                     player.turn +=1
                     print (operations,player.turn)
                     if player.turn == max_turn:
@@ -148,15 +149,14 @@ def send_receive_client_message(client_connection,addr):
                             value = dict(scores=ls_of_results)
                             send_new_request(player.client,'final',value)
                     elif len(operations)<player.turn:
-                        print('first player to play')
+                        print(f'{player.name} is the first player to play for the question {player.turn}')
                         value = start_a_game()
-                        print(value)
                         send_new_request(player.client,'operation',value)
+                        game_turn += 1
                     else:
-                        print('second player to play')
+                        print(f'{player.name} is the second player to play for the question {player.turn}')
                         operation = operations[player.turn -1]
                         value = {'op_str':operation[0],'res':operation[1]}
-                        print(value)
                         send_new_request(player.client,'operation',value)
                     print(f'{player.name} score is {player.score}')
 
